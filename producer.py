@@ -8,7 +8,13 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 
-ips = ["192.168.1.10", "10.0.0.5", "172.16.0.8"]
+ips = [
+    "192.168.1.10",
+    "10.0.0.5",
+    "172.16.0.8",
+    "45.12.34.56",
+    "103.12.5.10"
+]
 
 print("🚀 Producer running...")
 
