@@ -1,149 +1,166 @@
-# AI-Driven SIEM with Real-Time Monitoring, UEBA, Threat Intelligence, and SOAR
+# AI-Driven SIEM with Real-Time Threat Detection, UEBA, Threat Intelligence, and SOAR Automation
 
 ## Project Overview
 
-This project is an AI-Driven Security Information and Event Management (SIEM) system designed to detect, analyze, and respond to cybersecurity threats in real time.
+This project is an AI-powered Security Information and Event Management (SIEM) system that provides real-time threat detection, behavioral analytics, threat intelligence correlation, and automated incident response using machine learning and stream processing.
 
-The system combines:
+The system simulates a modern SOC (Security Operations Center) pipeline using:
 
-* Real-Time Log Monitoring using Apache Kafka
-* Artificial Intelligence (Isolation Forest)
-* User and Entity Behavior Analytics (UEBA)
-* Threat Intelligence Correlation
-* Risk-Based Alerting
-* SOAR (Security Orchestration, Automation and Response)
-* Interactive Web Dashboard
-
-The goal is to improve threat detection accuracy and automate incident response compared to traditional SIEM solutions.
+* Apache Kafka for real-time log streaming
+* Machine Learning (Isolation Forest) for anomaly detection
+* UEBA (User and Entity Behavior Analytics)
+* Threat Intelligence integration (IOC matching)
+* Dynamic Rule Generation (adaptive detection logic)
+* Risk-based alerting engine
+* SOAR automation (security response actions)
+* Flask-based real-time dashboard
 
 ---
 
 ## Key Features
 
-### Real-Time Monitoring
+## 1. Real-Time Security Monitoring (Kafka Streaming)
 
-Apache Kafka is used to simulate a real-time log collection environment.
+The system uses Apache Kafka to simulate real-time ingestion of security logs.
 
-A Kafka Producer continuously generates security events and sends them to a Kafka topic.
-
-A Kafka Consumer receives these events in real time and processes them immediately for threat detection and response.
-
----
-
-### AI-Powered Threat Detection
-
-The system uses the Isolation Forest Machine Learning algorithm from Scikit-Learn.
-
-The model analyzes security metrics such as:
-
-* Failed Login Attempts
-* Event Count
-
-The algorithm automatically identifies abnormal behavior and flags suspicious activities without requiring labeled attack data.
+* Producer generates continuous security events
+* Consumer processes logs instantly
+* Enables high-speed threat detection pipeline
 
 ---
 
-### User and Entity Behavior Analytics (UEBA)
+## 2. AI-Based Threat Detection
 
-UEBA is used to identify unusual user or device behavior.
+Machine learning is used to detect abnormal behavior in security logs.
 
-The system learns normal activity patterns for each source IP address and detects deviations from established baselines.
+### Model Used:
 
-Examples include:
+* Isolation Forest (unsupervised anomaly detection)
 
-* Excessive login failures
-* Unusual event volumes
-* Abnormal user activity
+### Features analyzed:
 
-UEBA provides an additional layer of detection beyond traditional rule-based monitoring.
+* Failed login attempts
+* Event count
+
+The model identifies suspicious activity without needing labeled attack data.
 
 ---
 
-### Threat Intelligence Integration
+## 3. UEBA (User and Entity Behavior Analytics)
 
-The SIEM integrates Threat Intelligence to identify known malicious infrastructure.
+The system builds behavioral profiles per IP address.
 
-A local Threat Intelligence database is maintained in:
+It detects deviations such as:
+
+* Unusual login attempts
+* Abnormal event spikes
+* Behavioral anomalies per user/entity
+
+This enhances detection beyond simple rule-based systems.
+
+---
+
+## 4. Threat Intelligence Integration
+
+The SIEM integrates a local Threat Intelligence database:
 
 ```json
 threat_intel.json
 ```
 
-Example Threat Intelligence Data:
+### Functionality:
 
-```json
-{
-  "45.12.34.56": "APT28",
-  "103.12.5.10": "APT29"
-}
-```
+* Matches incoming IPs against known malicious indicators (IOCs)
+* Identifies threat actors (e.g., APT groups)
+* Enhances risk scoring when a match is found
 
-Whenever a security event is received, the source IP address is automatically checked against the Threat Intelligence database.
+### Example Threat Intelligence Data:
 
-If a match is found:
+| IP Address  | Threat Actor |
+| ----------- | ------------ |
+| 45.12.34.56 | APT28        |
+| 103.12.5.10 | APT29        |
 
-* The event is marked as a Threat Intelligence Match.
-* The associated threat actor is identified.
-* Additional risk points are added.
-* The attack is classified as a Known Malicious IP.
-* Automated response actions may be triggered.
+### Impact:
 
-Examples:
-
-| Malicious IP | Threat Actor |
-| ------------ | ------------ |
-| 45.12.34.56  | APT28        |
-| 103.12.5.10  | APT29        |
-
-This process is known as Indicator of Compromise (IOC) Correlation.
-
-Threat Intelligence enables the SIEM to detect known threats even when behavioral anomalies are not present.
+* Known malicious IPs are immediately flagged
+* Increases confidence in detection accuracy
 
 ---
 
-### Risk Scoring Engine
+## 5. Dynamic Rule Generation (NEW)
 
-Each event is assigned a dynamic risk score.
+The system automatically generates detection rules based on real-time behavior.
 
-The score is calculated using:
+### How it works:
 
-* Failed Login Attempts
-* AI Anomaly Detection Results
-* UEBA Detection Results
-* Threat Intelligence Matches
+* The system calculates the average failed login attempts from streaming data
 
-Example Logic:
+* It builds a dynamic threshold:
 
-* Failed Logins contribute to the base score.
-* AI anomalies increase risk.
-* UEBA anomalies increase risk.
-* Threat Intelligence matches increase risk.
+  ```
+  dynamic_threshold = average_failed_logins × 2
+  ```
 
-This approach allows the system to prioritize the most dangerous threats.
+* If an event exceeds this threshold:
+
+  * A dynamic rule is triggered
+  * A new attack signature is generated
+
+### Example:
+
+* Normal behavior: 2–5 failed logins
+* Dynamic threshold adapts automatically
+* If a user exceeds learned baseline → flagged as anomaly
+
+### Generated Signature Example:
+
+* `DYNAMIC_BRUTE_FORCE_PATTERN`
+
+### Benefits:
+
+* Eliminates static rule dependency
+* Adapts to evolving attack patterns
+* Reduces false positives
+* Mimics real SOC behavior
 
 ---
 
-### Alert Severity Classification
+## 6. Risk Scoring Engine
 
-Based on the calculated risk score, alerts are categorized into:
+Each event is assigned a dynamic risk score based on:
 
-| Severity | Description                                 |
-| -------- | ------------------------------------------- |
-| LOW      | Minimal threat activity                     |
-| HIGH     | Suspicious activity requiring investigation |
-| CRITICAL | Immediate security threat                   |
+* Failed login attempts
+* ML anomaly detection
+* UEBA anomalies
+* Threat intelligence matches
+* Dynamic rule triggers
 
-This helps analysts focus on the most important incidents first.
+### Risk Formula:
+
+* Base risk from failed logins
+* +30 if ML anomaly detected
+* +40 if UEBA anomaly detected
+* +50 if threat intelligence match
+* +20 if dynamic rule triggered
 
 ---
 
-### SOAR Automation
+## 7. Alert Severity Classification
 
-The project includes Security Orchestration, Automation and Response (SOAR) capabilities.
+Alerts are categorized into:
 
-Based on the calculated risk score, the system automatically performs response actions.
+| Severity | Description            |
+| -------- | ---------------------- |
+| LOW      | Normal activity        |
+| HIGH     | Suspicious activity    |
+| CRITICAL | Severe threat detected |
 
-Possible actions include:
+---
+
+## 8. SOAR Automation (Response Engine)
+
+Based on risk score, automated responses are triggered:
 
 | Risk Level | Action     |
 | ---------- | ---------- |
@@ -151,62 +168,49 @@ Possible actions include:
 | Medium     | Rate Limit |
 | High       | Block IP   |
 
-Automated response reduces analyst workload and accelerates incident containment.
+### Actions include:
+
+* IP blocking
+* Rate limiting
+* Monitoring only
 
 ---
 
-## Dashboard Features
+## 9. Real-Time Dashboard
 
-The web dashboard provides real-time visibility into security events.
+A Flask-based dashboard displays live security events.
 
-Displayed information includes:
+### Features:
 
-* Source IP Address
-* Incident Severity
-* Threat Risk Score
-* Threat Classification
-* Threat Intelligence Correlation
-* Threat Attribution
-* Behavioral Analytics Status
-* AI Detection Status
-* Automated Response Actions
-* Containment Status
-
-Dashboard statistics include:
-
-* Total Security Events
-* Critical Alerts
-* High-Risk Alerts
-* Low-Risk Alerts
-
-All alerts are automatically updated in real time.
+* Live event updates (every 2 seconds)
+* Severity classification
+* Threat intelligence correlation
+* Dynamic rule status
+* Risk score visualization
+* SOAR action tracking
 
 ---
 
 ## Project Architecture
 
-```text
-Security Logs
-      │
-      ▼
+```
 Kafka Producer
-      │
-      ▼
-Apache Kafka
-      │
-      ▼
+     ↓
+Apache Kafka Topic
+     ↓
 Kafka Consumer
-      │
-      ├── AI Detection (Isolation Forest)
-      ├── UEBA Analysis
-      ├── Threat Intelligence Correlation
-      ├── Risk Scoring
-      └── SOAR Automation
-      │
-      ▼
+     ↓
+┌──────────────────────────────┐
+│ AI Detection (Isolation Forest) │
+│ UEBA Analysis                 │
+│ Threat Intelligence Match     │
+│ Dynamic Rule Generation       │
+│ Risk Scoring Engine           │
+│ SOAR Automation              │
+└──────────────────────────────┘
+     ↓
 alerts.json
-      │
-      ▼
+     ↓
 Flask Dashboard
 ```
 
@@ -217,11 +221,9 @@ Flask Dashboard
 * Python
 * Flask
 * Apache Kafka
-* Scikit-Learn
+* Scikit-learn
 * Pandas
-* HTML
-* CSS
-* JavaScript
+* HTML, CSS, JavaScript
 * JSON
 
 ---
@@ -230,45 +232,77 @@ Flask Dashboard
 
 ### app.py
 
-Flask application that serves the dashboard and provides API access to security alerts.
+Flask backend serving API and dashboard.
 
 ### producer.py
 
-Generates simulated security logs and streams them to Apache Kafka.
+Simulates real-time security log generation.
 
 ### consumer.py
 
-Processes incoming logs, performs AI detection, UEBA analysis, Threat Intelligence correlation, risk scoring, and automated response actions.
+Core SIEM engine:
+
+* ML detection
+* UEBA
+* Threat intelligence
+* Dynamic rule generation
+* Risk scoring
+* SOAR automation
 
 ### dashboard.html
 
-Interactive web dashboard used to visualize security events and alerts.
+Real-time visualization dashboard.
 
 ### alerts.json
 
-Stores generated alerts for dashboard visualization.
+Stores generated alerts for UI display.
 
 ### threat_intel.json
 
-Threat Intelligence database containing known malicious IP addresses and associated threat actors.
-
-### users.json
-
-Sample user account data used for authentication simulation.
+Contains known malicious IPs and threat actors.
 
 ### evidence.txt
 
-Sample security event evidence used for testing and validation.
+Sample security event dataset for testing.
 
 ### compliance_report.txt
 
-Generated compliance and audit reporting information.
+Basic audit and compliance output.
+
+---
+
+## Industry Relevance
+
+This system simulates enterprise-level security environments used in:
+
+* Security Operations Centers (SOC)
+* Managed Security Service Providers (MSSP)
+* Government cyber defense systems
+* Enterprise threat monitoring platforms
+
+---
+
+## Open Source Tools Used
+
+* SIEM: Custom Flask-based system
+* ML: scikit-learn (Isolation Forest)
+* Streaming: Apache Kafka
+* Visualization: Custom dashboard
+* Threat Intelligence: JSON-based IOC database
 
 ---
 
 ## Conclusion
 
-This project demonstrates how Artificial Intelligence, Threat Intelligence, UEBA, SOAR, and Real-Time Monitoring can be integrated into a modern SIEM platform.
+This project demonstrates a full modern SIEM pipeline integrating:
 
-The solution provides proactive threat detection, automated incident response, behavioral analytics, and threat intelligence correlation, helping security teams identify and respond to cyber threats more efficiently.
+* Real-time streaming security analytics
+* Machine learning-based anomaly detection
+* Behavioral analytics (UEBA)
+* Threat intelligence correlation
+* Dynamic rule generation
+* Automated incident response (SOAR)
+
+The system provides adaptive, intelligent, and automated cybersecurity monitoring similar to enterprise SOC platforms.
+
 
