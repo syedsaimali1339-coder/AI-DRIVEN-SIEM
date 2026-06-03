@@ -1,0 +1,5 @@
+=== AI SIEM COMPLIANCE REPORT ===
+
+Generated: 2026-06-03 09:20:45.128771
+Total Logs: 10
+Total Alerts: 10
