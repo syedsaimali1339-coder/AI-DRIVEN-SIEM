@@ -1,0 +1,9 @@
+{
+    "generated_at": "2026-06-03 19:09:51.975521",
+    "total_logs": 35,
+    "total_alerts": 35,
+    "critical_alerts": 7,
+    "high_alerts": 13,
+    "low_alerts": 15,
+    "blocked_ips": 3
+}
