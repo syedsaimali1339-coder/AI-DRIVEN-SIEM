@@ -3,6 +3,12 @@ import json
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 
+# =========================
+# LOAD THREAT INTELLIGENCE
+# =========================
+with open("threat_intel.json", "r") as f:
+    threat_db = json.load(f)
+
 consumer = KafkaConsumer(
     'security-logs',
     bootstrap_servers='localhost:9092',
@@ -29,9 +35,6 @@ for msg in consumer:
     log = msg.value
     print("RAW:", log)
 
-    # =========================
-    # SAFE SCHEMA HANDLING
-    # =========================
     if "src_ip" not in log:
         log["src_ip"] = log.get("ip", "UNKNOWN")
 
@@ -43,38 +46,63 @@ for msg in consumer:
     df = pd.DataFrame(stream_data)
 
     # =========================
-    # ML MODEL
+    # AI ANOMALY DETECTION
     # =========================
     X = df[["failed_logins", "event_count"]]
 
-    model = IsolationForest(contamination=0.2, random_state=42)
+    model = IsolationForest(
+        contamination=0.2,
+        random_state=42
+    )
+
     model.fit(X)
 
     df["anomaly"] = model.predict(X)
 
     # =========================
-    # UEBA MODEL
+    # UEBA
     # =========================
     ueba = df.groupby("src_ip").agg({
         "failed_logins": "mean",
         "event_count": "mean"
     }).reset_index()
 
-    ueba_model = IsolationForest(contamination=0.1, random_state=42)
-    ueba_model.fit(ueba[["failed_logins", "event_count"]])
+    ueba_model = IsolationForest(
+        contamination=0.1,
+        random_state=42
+    )
 
-    ueba["ueba_anomaly"] = ueba_model.predict(ueba[["failed_logins", "event_count"]])
+    ueba_model.fit(
+        ueba[["failed_logins", "event_count"]]
+    )
+
+    ueba["ueba_anomaly"] = ueba_model.predict(
+        ueba[["failed_logins", "event_count"]]
+    )
 
     # =========================
     # LATEST EVENT
     # =========================
     latest = df.iloc[-1]
+
     ip = latest["src_ip"]
 
     anomaly = bool(latest["anomaly"] == -1)
 
     user = ueba[ueba["src_ip"] == ip]
-    ueba_flag = bool(user["ueba_anomaly"].values[0] == -1) if len(user) > 0 else False
+
+    ueba_flag = (
+        bool(user["ueba_anomaly"].values[0] == -1)
+        if len(user) > 0
+        else False
+    )
+
+    # =========================
+    # THREAT INTELLIGENCE
+    # =========================
+    threat_match = ip in threat_db
+
+    threat_actor = threat_db.get(ip, "None")
 
     # =========================
     # RISK ENGINE
@@ -83,16 +111,22 @@ for msg in consumer:
 
     if anomaly:
         risk += 30
+
     if ueba_flag:
         risk += 40
 
+    if threat_match:
+        risk += 50
+
     # =========================
-    # SEVERITY (UPDATED RULES)
+    # SEVERITY
     # =========================
     if risk > 80:
         severity = "CRITICAL"
+
     elif risk > 40:
         severity = "HIGH"
+
     else:
         severity = "LOW"
 
@@ -109,7 +143,7 @@ for msg in consumer:
         action = "RATE_LIMIT"
 
     # =========================
-    # ALERT OBJECT
+    # ALERT
     # =========================
     alert = {
         "ip": str(ip),
@@ -117,6 +151,8 @@ for msg in consumer:
         "severity": severity,
         "ueba": to_safe_bool(ueba_flag),
         "anomaly": to_safe_bool(anomaly),
+        "threat_match": to_safe_bool(threat_match),
+        "threat_actor": threat_actor,
         "action": action,
         "blocked": ip in blocked_ips
     }
@@ -125,6 +161,5 @@ for msg in consumer:
 
     print("🚨 ALERT:", alert)
 
-    # Save for dashboard
     with open("alerts.json", "w") as f:
         json.dump(alerts, f, indent=4)
