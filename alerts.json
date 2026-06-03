@@ -1,0 +1,236 @@
+[
+    {
+        "ip": "10.0.0.5",
+        "risk": 2,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "10.0.0.5",
+        "risk": 4,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 64,
+        "severity": "HIGH",
+        "ueba": false,
+        "anomaly": true,
+        "action": "BLOCK_IP",
+        "blocked": true
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 60,
+        "severity": "HIGH",
+        "ueba": false,
+        "anomaly": true,
+        "action": "RATE_LIMIT",
+        "blocked": false
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 26,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "10.0.0.5",
+        "risk": 44,
+        "severity": "HIGH",
+        "ueba": true,
+        "anomaly": false,
+        "action": "RATE_LIMIT",
+        "blocked": false
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 40,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 14,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 48,
+        "severity": "HIGH",
+        "ueba": true,
+        "anomaly": false,
+        "action": "RATE_LIMIT",
+        "blocked": false
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 34,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 44,
+        "severity": "HIGH",
+        "ueba": true,
+        "anomaly": false,
+        "action": "RATE_LIMIT",
+        "blocked": false
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 32,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 54,
+        "severity": "HIGH",
+        "ueba": false,
+        "anomaly": true,
+        "action": "RATE_LIMIT",
+        "blocked": true
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 2,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 10,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    },
+    {
+        "ip": "10.0.0.5",
+        "risk": 8,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "10.0.0.5",
+        "risk": 8,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "10.0.0.5",
+        "risk": 6,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 28,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 2,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    },
+    {
+        "ip": "172.16.0.8",
+        "risk": 62,
+        "severity": "HIGH",
+        "ueba": true,
+        "anomaly": false,
+        "action": "BLOCK_IP",
+        "blocked": true
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 36,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 70,
+        "severity": "HIGH",
+        "ueba": false,
+        "anomaly": true,
+        "action": "BLOCK_IP",
+        "blocked": true
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 28,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    },
+    {
+        "ip": "10.0.0.5",
+        "risk": 24,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": false
+    },
+    {
+        "ip": "192.168.1.10",
+        "risk": 0,
+        "severity": "LOW",
+        "ueba": false,
+        "anomaly": false,
+        "action": "MONITOR",
+        "blocked": true
+    }
+]
