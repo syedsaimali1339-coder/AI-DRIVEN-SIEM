@@ -154,7 +154,7 @@ for msg in consumer:
         "threat_match": to_safe_bool(threat_match),
         "threat_actor": threat_actor,
         "action": action,
-        "blocked": ip in blocked_ips
+        "blocked": action == "BLOCK_IP"
     }
 
     alerts.append(alert)
