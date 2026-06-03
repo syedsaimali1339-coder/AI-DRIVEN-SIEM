@@ -217,6 +217,7 @@ tr:hover{
 <th>Attack Type</th>
 <th>Threat Intel</th>
 <th>Threat Actor</th>
+<th>Dynamic Rule</th>
 <th>UEBA</th>
 <th>Anomaly</th>
 <th>SOAR Action</th>
@@ -328,8 +329,9 @@ async function loadData(){
                 <td>${a.risk}</td>
                 <td>${attack}</td>
                 <td>${formatThreatIntel(a.threat_match || false)}</td>
-                <td>${a.threat_actor || "None"}</td>
-                <td>${formatYesNo(a.ueba)}</td>
+<td>${a.threat_actor || "None"}</td>
+<td>${formatYesNo(a.dynamic_rule || false)}</td>
+<td>${formatYesNo(a.ueba)}</td>
                 <td>${formatYesNo(a.anomaly)}</td>
                 <td>${formatAction(a.action)}</td>
                 <td>${formatYesNo(a.blocked)}</td>
