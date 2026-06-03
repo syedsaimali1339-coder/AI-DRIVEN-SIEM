@@ -103,6 +103,22 @@ for msg in consumer:
     threat_match = ip in threat_db
 
     threat_actor = threat_db.get(ip, "None")
+    # =========================
+    # DYNAMIC RULE GENERATION
+    # =========================
+
+    avg_failed_logins = df["failed_logins"].mean()
+
+    dynamic_threshold = avg_failed_logins * 2
+
+    dynamic_rule = (
+        latest["failed_logins"] > dynamic_threshold
+    )
+
+    attack_signature = "NORMAL"
+
+    if dynamic_rule:
+        attack_signature = "DYNAMIC_BRUTE_FORCE_PATTERN"
 
     # =========================
     # RISK ENGINE
@@ -118,6 +134,8 @@ for msg in consumer:
     if threat_match:
         risk += 50
 
+    if dynamic_rule:
+        risk += 20
     # =========================
     # SEVERITY
     # =========================
@@ -151,8 +169,13 @@ for msg in consumer:
         "severity": severity,
         "ueba": to_safe_bool(ueba_flag),
         "anomaly": to_safe_bool(anomaly),
+
         "threat_match": to_safe_bool(threat_match),
         "threat_actor": threat_actor,
+
+        "dynamic_rule": to_safe_bool(dynamic_rule),
+        "attack_signature": attack_signature,
+
         "action": action,
         "blocked": action == "BLOCK_IP"
     }
