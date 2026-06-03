@@ -31,11 +31,13 @@ body{
 .header h1{
     color:#ffffff;
     font-size:32px;
+    text-align:center;
 }
 
 .header p{
     color:#d1fffa;
     margin-top:8px;
+    text-align:center;
 }
 
 .container{
@@ -94,7 +96,7 @@ body{
 .table-container{
     background:#ffffff;
     border-radius:15px;
-    overflow:hidden;
+    overflow-x:auto;
     box-shadow:0 3px 15px rgba(15,118,110,0.10);
 }
 
@@ -107,12 +109,15 @@ th{
     background:#0f766e;
     color:#ffffff;
     padding:15px;
-    text-align:left;
+    text-align:center;
+    border-right:1px solid rgba(255,255,255,0.25);
 }
 
 td{
     padding:15px;
     border-bottom:1px solid #e2f3f1;
+    border-right:1px solid #d7ebe8;
+    text-align:center;
 }
 
 tr:hover{
@@ -146,7 +151,6 @@ tr:hover{
     color:#4b6b67;
 }
 
-/* YES / NO COLORS */
 .yes{
     color:#ef4444;
     font-weight:bold;
@@ -175,27 +179,26 @@ tr:hover{
 <p>AI Detection Engine Active | UEBA Active | SOAR Active</p>
 </div>
 
-<!-- STATS -->
 <div class="cards">
 
 <div class="card total">
 <h3>Total Security Events</h3>
-<h1 id="total">{{ total }}</h1>
+<h1 id="total">0</h1>
 </div>
 
 <div class="card critical">
 <h3>Critical Alerts</h3>
-<h1 id="critical">{{ critical }}</h1>
+<h1 id="critical">0</h1>
 </div>
 
 <div class="card high">
 <h3>High Risk Alerts</h3>
-<h1 id="high">{{ high }}</h1>
+<h1 id="high">0</h1>
 </div>
 
 <div class="card low">
 <h3>Low Risk Alerts</h3>
-<h1 id="low">{{ low }}</h1>
+<h1 id="low">0</h1>
 </div>
 
 </div>
@@ -206,16 +209,20 @@ tr:hover{
 
 <table>
 
+<thead>
 <tr>
 <th>Source IP</th>
 <th>Severity</th>
 <th>Risk Score</th>
 <th>Attack Type</th>
+<th>Threat Intel</th>
+<th>Threat Actor</th>
 <th>UEBA</th>
 <th>Anomaly</th>
 <th>SOAR Action</th>
 <th>Blocked</th>
 </tr>
+</thead>
 
 <tbody id="tableBody"></tbody>
 
@@ -224,11 +231,9 @@ tr:hover{
 </div>
 
 <div class="footer">
-
-<p>Last Updated: {{ update_time }}</p>
+<p>Last Updated: Real-Time</p>
 <p>Machine Learning Model: Isolation Forest</p>
 <p>UEBA + SOAR + Threat Intelligence Active</p>
-
 </div>
 
 </div>
@@ -236,44 +241,67 @@ tr:hover{
 <script>
 
 function formatSeverity(severity){
+
     if(severity === "CRITICAL"){
         return `<span class="badge badge-critical">CRITICAL</span>`;
     }
+
     if(severity === "HIGH"){
         return `<span class="badge badge-high">HIGH</span>`;
     }
+
     return `<span class="badge badge-low">LOW</span>`;
 }
 
 function formatYesNo(value){
-    return value ? `<span class="yes">YES</span>` : `<span class="no">NO</span>`;
+    return value
+        ? `<span class="yes">YES</span>`
+        : `<span class="no">NO</span>`;
 }
+function formatThreatIntel(value){
 
-function formatAttack(risk, ueba, anomaly){
+    return value
+        ? `<span style="color:#ef4444;font-weight:bold;">MATCHED</span>`
+        : `<span style="color:#10b981;font-weight:bold;">NOT MATCHED</span>`;
+}
+function formatAttack(risk, ueba, anomaly, threat){
+
+    if(threat){
+        return "KNOWN MALICIOUS IP";
+    }
+
     if(risk > 60){
         return "BRUTE FORCE";
     }
+
     if(ueba){
         return "UEBA ANOMALY";
     }
+
     if(anomaly){
         return "SUSPICIOUS ACTIVITY";
     }
+
     return "NORMAL";
 }
 
 function formatAction(action){
+
     if(action === "BLOCK_IP"){
-        return `<span style="color:#ef4444; font-weight:bold;">IP BLOCKED</span>`;
+        return `<span style="color:#ef4444;font-weight:bold;">IP BLOCKED</span>`;
     }
+
     if(action === "RATE_LIMIT"){
-        return `<span style="color:#f59e0b; font-weight:bold;">RATE LIMIT</span>`;
+        return `<span style="color:#f59e0b;font-weight:bold;">RATE LIMIT</span>`;
     }
+
     return `<span style="color:#10b981;">MONITOR</span>`;
 }
 
-async function loadData() {
-    try {
+async function loadData(){
+
+    try{
+
         const res = await fetch("/api/alerts");
         const data = await res.json();
 
@@ -286,7 +314,12 @@ async function loadData() {
 
         data.alerts.slice().reverse().forEach(a => {
 
-            let attack = formatAttack(a.risk, a.ueba, a.anomaly);
+            let attack = formatAttack(
+                a.risk,
+                a.ueba,
+                a.anomaly,
+                a.threat_match || false
+            );
 
             html += `
             <tr>
@@ -294,6 +327,8 @@ async function loadData() {
                 <td>${formatSeverity(a.severity)}</td>
                 <td>${a.risk}</td>
                 <td>${attack}</td>
+                <td>${formatThreatIntel(a.threat_match || false)}</td>
+                <td>${a.threat_actor || "None"}</td>
                 <td>${formatYesNo(a.ueba)}</td>
                 <td>${formatYesNo(a.anomaly)}</td>
                 <td>${formatAction(a.action)}</td>
@@ -304,266 +339,16 @@ async function loadData() {
 
         document.getElementById("tableBody").innerHTML = html;
 
-    } catch (err) {
+    }catch(err){
+
         console.log("Error loading data:", err);
     }
 }
 
-setInterval(loadData, 2000);
 loadData();
+setInterval(loadData, 2000);
 
 </script>
 
 </body>
 </html>
-______________________________________________
-alerts.json:
-[
-    {
-        "ip": "10.0.0.5",
-        "risk": 2,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "10.0.0.5",
-        "risk": 4,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 64,
-        "severity": "HIGH",
-        "ueba": false,
-        "anomaly": true,
-        "action": "BLOCK_IP",
-        "blocked": true
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 60,
-        "severity": "HIGH",
-        "ueba": false,
-        "anomaly": true,
-        "action": "RATE_LIMIT",
-        "blocked": false
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 26,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "10.0.0.5",
-        "risk": 44,
-        "severity": "HIGH",
-        "ueba": true,
-        "anomaly": false,
-        "action": "RATE_LIMIT",
-        "blocked": false
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 40,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 14,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 48,
-        "severity": "HIGH",
-        "ueba": true,
-        "anomaly": false,
-        "action": "RATE_LIMIT",
-        "blocked": false
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 34,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 44,
-        "severity": "HIGH",
-        "ueba": true,
-        "anomaly": false,
-        "action": "RATE_LIMIT",
-        "blocked": false
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 32,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 54,
-        "severity": "HIGH",
-        "ueba": false,
-        "anomaly": true,
-        "action": "RATE_LIMIT",
-        "blocked": true
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 2,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 10,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    },
-    {
-        "ip": "10.0.0.5",
-        "risk": 8,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "10.0.0.5",
-        "risk": 8,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "10.0.0.5",
-        "risk": 6,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 28,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 2,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    },
-    {
-        "ip": "172.16.0.8",
-        "risk": 62,
-        "severity": "HIGH",
-        "ueba": true,
-        "anomaly": false,
-        "action": "BLOCK_IP",
-        "blocked": true
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 36,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 70,
-        "severity": "HIGH",
-        "ueba": false,
-        "anomaly": true,
-        "action": "BLOCK_IP",
-        "blocked": true
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 28,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    },
-    {
-        "ip": "10.0.0.5",
-        "risk": 24,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": false
-    },
-    {
-        "ip": "192.168.1.10",
-        "risk": 0,
-        "severity": "LOW",
-        "ueba": false,
-        "anomaly": false,
-        "action": "MONITOR",
-        "blocked": true
-    }
-]
-_______________________________________________
-threat_intel.json:
-{
-  "45.12.34.56":"APT28",
-  "103.12.5.10":"APT29"
-}
-
-__________________________________________________
-users.json:
-{
-  "admin": "admin123",
-  "analyst": "test123"
-}
